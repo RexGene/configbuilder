@@ -1,8 +1,10 @@
 package configbuilder
 
 import (
+	"fmt"
 	"github.com/RexGene/csvparser"
 	"reflect"
+	"strconv"
 )
 
 type csvParser struct {
@@ -17,12 +19,13 @@ func (self *csvParser) GetTypeString() string {
 }
 
 func (self *csvParser) GenerateConfig(meta *configMeta) error {
-	data, err := csvparser.Parse(meta.configPath)
+	configPath := meta.configPath
+	data, err := csvparser.Parse(configPath)
 	if err != nil {
 		return err
 	}
 
-	for _, row := range data {
+	for lineKey, row := range data {
 		ptr := reflect.New(meta.configType)
 		elem := ptr.Elem()
 		var keyValue interface{}
@@ -36,15 +39,39 @@ func (self *csvParser) GenerateConfig(meta *configMeta) error {
 			kind := v.Type().Kind()
 			switch kind {
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				v.SetInt(int64(field.Int(0)))
+				value, err := strconv.ParseInt(string(field), 10, 64)
+				if err != nil {
+					msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to int",
+						configPath, key, field, lineKey)
+					panic(msg)
+				}
+				v.SetInt(value)
 			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-				v.SetUint(uint64(field.Uint(0)))
+				value, err := strconv.ParseUint(string(field), 10, 64)
+				if err != nil {
+					msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to uint",
+						configPath, key, field, lineKey)
+					panic(msg)
+				}
+				v.SetUint(value)
 			case reflect.String:
 				v.SetString(field.Str())
 			case reflect.Float32, reflect.Float64:
-				v.SetFloat(float64(field.Float(0)))
+				value, err := strconv.ParseFloat(string(field), 64)
+				if err != nil {
+					msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to float",
+						configPath, key, field, lineKey)
+					panic(msg)
+				}
+				v.SetFloat(value)
 			case reflect.Bool:
-				v.SetBool(field.Int(0) != 0)
+				value, err := strconv.ParseInt(string(field), 10, 64)
+				if err != nil {
+					msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to bool",
+						configPath, key, field, lineKey)
+					panic(msg)
+				}
+				v.SetBool(value != 0)
 			}
 
 			if index == meta.keyIndex {

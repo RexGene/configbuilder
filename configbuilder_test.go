@@ -16,7 +16,7 @@ type T struct {
 func TestConfigBuilder(t *testing.T) {
 	builder := NewConfigBuilder()
 	config := builder.MakeConfig(FileType_Csv, "test.csv", (*T)(nil))
-	row := config[uint(2)].(*T)
+	row := config[uint(3)].(*T)
 
 	fmt.Println("struct:", *row)
 }
