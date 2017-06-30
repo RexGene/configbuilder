@@ -39,39 +39,55 @@ func (self *csvParser) GenerateConfig(meta *configMeta) error {
 			kind := v.Type().Kind()
 			switch kind {
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				value, err := strconv.ParseInt(string(field), 10, 64)
-				if err != nil {
-					msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to int",
-						configPath, key, field, lineKey)
-					panic(msg)
+				if string(field) == "" {
+					v.SetInt(0)
+				} else {
+					value, err := strconv.ParseInt(string(field), 10, 64)
+					if err != nil {
+						msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to int",
+							configPath, key, field, lineKey)
+						panic(msg)
+					}
+					v.SetInt(value)
 				}
-				v.SetInt(value)
 			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-				value, err := strconv.ParseUint(string(field), 10, 64)
-				if err != nil {
-					msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to uint",
-						configPath, key, field, lineKey)
-					panic(msg)
+				if string(field) == "" {
+					v.SetUint(0)
+				} else {
+					value, err := strconv.ParseUint(string(field), 10, 64)
+					if err != nil {
+						msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to uint",
+							configPath, key, field, lineKey)
+						panic(msg)
+					}
+					v.SetUint(value)
 				}
-				v.SetUint(value)
 			case reflect.String:
 				v.SetString(field.Str())
 			case reflect.Float32, reflect.Float64:
-				value, err := strconv.ParseFloat(string(field), 64)
-				if err != nil {
-					msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to float",
-						configPath, key, field, lineKey)
-					panic(msg)
+				if string(field) == "" {
+					v.SetFloat(0)
+				} else {
+					value, err := strconv.ParseFloat(string(field), 64)
+					if err != nil {
+						msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to float",
+							configPath, key, field, lineKey)
+						panic(msg)
+					}
+					v.SetFloat(value)
 				}
-				v.SetFloat(value)
 			case reflect.Bool:
-				value, err := strconv.ParseInt(string(field), 10, 64)
-				if err != nil {
-					msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to bool",
-						configPath, key, field, lineKey)
-					panic(msg)
+				if string(field) == "" {
+					v.SetBool(false)
+				} else {
+					value, err := strconv.ParseInt(string(field), 10, 64)
+					if err != nil {
+						msg := fmt.Sprintf("[-] csvParser: %s field <%s:%s key:%s> could not convert to bool",
+							configPath, key, field, lineKey)
+						panic(msg)
+					}
+					v.SetBool(value != 0)
 				}
-				v.SetBool(value != 0)
 			}
 
 			if index == meta.keyIndex {

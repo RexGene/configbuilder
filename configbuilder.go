@@ -1,6 +1,7 @@
 package configbuilder
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 )
@@ -39,7 +40,8 @@ func (self *ConfigBuilder) MakeConfig(fileType int, configPath string, structTyp
 	meta.parseStructType(parser.GetTypeString(), reflect.TypeOf(structType))
 
 	if err := parser.GenerateConfig(meta); err != nil {
-		panic("[-] ConfigBuilder:" + err.Error())
+		msg := fmt.Sprintf("[-] ConfigBuilder:%s %s", configPath, err.Error())
+		panic(msg)
 	}
 
 	self.Lock()
